@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 
 # Bobot variabel (AHP)
 weights = {
@@ -48,6 +49,7 @@ def calculate_weighted_scores(data, weights):
     for column in weights.keys():
         df[column] = df[column] * weights[column]
     df['Total Score'] = df[list(weights.keys())].sum(axis=1)
+    df.insert(0, 'No.', range(1, len(df) + 1))
     return df
 
 def display_dashboard():
@@ -56,12 +58,16 @@ def display_dashboard():
     # Tampilan utama: hasil SAW
     st.subheader("Peringkat Platform Berdasarkan SAW")
     saw_df = pd.DataFrame(saw_data)
+    saw_df.insert(0, 'No.', range(1, len(saw_df) + 1))
+    st.bar_chart(saw_df.set_index('Platform')['Nilai SAW'])
     st.table(saw_df)
 
     # Tampilan hasil TOPSIS
     st.subheader("Nilai Terbaik dan Terburuk pada Masing-masing Variabel (TOPSIS)")
     topsis_best_df = pd.DataFrame(topsis_best)
+    topsis_best_df.insert(0, 'No.', range(1, len(topsis_best_df) + 1))
     topsis_worst_df = pd.DataFrame(topsis_worst)
+    topsis_worst_df.insert(0, 'No.', range(1, len(topsis_worst_df) + 1))
 
     col1, col2 = st.columns(2)
     with col1:
@@ -72,15 +78,16 @@ def display_dashboard():
         st.table(topsis_worst_df)
 
     # User memilih variabel
-    st.subheader("Peringkat Berdasarkan Variabel yang Dipilih")
-    selected_variable = st.selectbox("Pilih Variabel Penilaian:", list(weights.keys()))
+    st.sidebar.subheader("Pilih Variabel Penilaian")
+    selected_variable = st.sidebar.selectbox("Variabel:", list(weights.keys()))
 
     # Menampilkan peringkat berdasarkan variabel
     weighted_scores = calculate_weighted_scores(average_data, weights)
     sorted_scores = weighted_scores.sort_values(by=selected_variable, ascending=False)
 
-    st.write(f"Peringkat Berdasarkan Variabel: {selected_variable}")
-    st.table(sorted_scores[['Platform', selected_variable]])
+    st.subheader(f"Peringkat Berdasarkan Variabel: {selected_variable}")
+    st.bar_chart(sorted_scores.set_index('Platform')[selected_variable])
+    st.table(sorted_scores[['No.', 'Platform', selected_variable]])
 
 # Menampilkan dashboard
 display_dashboard()
