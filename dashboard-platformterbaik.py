@@ -51,30 +51,66 @@ topsis_data = {
 
 # Convert data to DataFrame
 saw_df = pd.DataFrame(saw_data)
+saw_df.index += 1  # Adjust index to start from 1
+
 topsis_df = pd.DataFrame(topsis_data)
 
 # Streamlit UI
-st.title("Platform Exchange Cryptocurrency Terbaik Menurut Mahasiswa Universitas Brawijaya")
-st.write("Hai! Perkenalkan, saya Jorge Michael Bryan. Mahasiswa Universitas Brawijaya yang meneliti tentang Platform Exchange Cryptocurrency terbaik.")
-st.write("Platform yang saya bandingkan adalah Binance, Indodax, dan Tokocrypto, sebagai top 3 platform crypto terfavorit berdasarkan App Store Indonesia. Berikut data yang saya sajikan.")
+st.title("Platform Exchange Cryptocurrency Terbaik")
+st.write("Hai! Saya Jorge Michael Bryan, mahasiswa Universitas Brawijaya. Berikut analisis platform exchange cryptocurrency berdasarkan beberapa variabel.")
 
-# Menu bar
+# Halaman Utama
+st.subheader("Perbandingan Keseluruhan Variabel")
+# Melting dataframe untuk menampilkan semua variabel dalam satu grafik
+nilai_melted = nilai_df.melt(id_vars="Platform", var_name="Variabel", value_name="Nilai")
+
+# Altair chart for combined variables
+combined_chart = (
+    alt.Chart(nilai_melted)
+    .mark_line(point=True)
+    .encode(
+        x=alt.X("Variabel:N", sort=list(bobot.keys())),
+        y=alt.Y("Nilai:Q"),
+        color=alt.Color("Platform:N", scale=alt.Scale(scheme="category10")),
+        tooltip=["Platform", "Variabel", "Nilai"]
+    )
+    .properties(
+        title="Perbandingan Nilai Antar Platform Berdasarkan Semua Variabel",
+        width=700,
+        height=400
+    )
+)
+st.altair_chart(combined_chart, use_container_width=True)
+
+# Sidebar Menu
 menu = st.sidebar.selectbox("Pilih Variabel", ["Platform Terbaik"] + list(bobot.keys()))
 
 if menu == "Platform Terbaik":
     st.subheader("Peringkat Platform Terbaik Berdasarkan SAW")
-    st.dataframe(saw_df)
-    st.subheader("Solusi Ideal Positif dan Negatif (TOPSIS)")
-    st.dataframe(topsis_df)
+    st.dataframe(saw_df)  # Menampilkan tabel dengan nomor urut mulai dari 1
+    # Grafik SAW
+    saw_chart = (
+        alt.Chart(saw_df)
+        .mark_bar()
+        .encode(
+            x=alt.X("Platform", sort=["Binance", "Indodax", "Tokocrypto"]),
+            y=alt.Y("Nilai SAW"),
+            color=alt.Color("Platform", scale=alt.Scale(scheme="category10")),
+            tooltip=["Platform", "Nilai SAW", "Peringkat"]
+        )
+        .properties(
+            title="Grafik Peringkat Berdasarkan SAW",
+            width=600,
+            height=400
+        )
+    )
+    st.altair_chart(saw_chart, use_container_width=True)
 else:
-    # Display the selected variable
     st.subheader(f"Perbandingan Berdasarkan Variabel: {menu}")
-    
-    # Prepare data for the selected variable
     comparison_df = nilai_df[["Platform", menu]]
     
-    # Create Altair chart
-    chart = (
+    # Grafik variabel tertentu
+    variable_chart = (
         alt.Chart(comparison_df)
         .mark_bar()
         .encode(
@@ -84,11 +120,9 @@ else:
             tooltip=["Platform", menu]
         )
         .properties(
-            title=f"Perbandingan {menu} Antar Platform",
+            title=f"Grafik {menu} Antar Platform",
             width=600,
             height=400
         )
     )
-    
-    # Display the chart
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(variable_chart, use_container_width=True)
