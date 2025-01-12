@@ -59,7 +59,13 @@ def display_dashboard():
     st.subheader("Peringkat Platform Berdasarkan SAW")
     saw_df = pd.DataFrame(saw_data)
     saw_df.insert(0, 'No.', range(1, len(saw_df) + 1))
-    st.bar_chart(saw_df.set_index('Platform')['Nilai SAW'])
+
+    saw_chart = alt.Chart(saw_df).mark_line(point=True).encode(
+        x='Platform',
+        y='Nilai SAW',
+        tooltip=['Platform', 'Nilai SAW', 'Peringkat']
+    )
+    st.altair_chart(saw_chart, use_container_width=True)
     st.table(saw_df)
 
     # Tampilan hasil TOPSIS
@@ -86,7 +92,13 @@ def display_dashboard():
     sorted_scores = weighted_scores.sort_values(by=selected_variable, ascending=False)
 
     st.subheader(f"Peringkat Berdasarkan Variabel: {selected_variable}")
-    st.bar_chart(sorted_scores.set_index('Platform')[selected_variable])
+    
+    variable_chart = alt.Chart(sorted_scores).mark_line(point=True).encode(
+        x='Platform',
+        y=selected_variable,
+        tooltip=['Platform', selected_variable]
+    )
+    st.altair_chart(variable_chart, use_container_width=True)
     st.table(sorted_scores[['No.', 'Platform', selected_variable]])
 
 # Menampilkan dashboard
