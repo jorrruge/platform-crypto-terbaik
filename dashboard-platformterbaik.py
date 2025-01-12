@@ -59,33 +59,32 @@ topsis_df = pd.DataFrame(topsis_data)
 st.title("Platform Exchange Cryptocurrency Terbaik")
 st.write("Hai! Saya Jorge Michael Bryan, mahasiswa Universitas Brawijaya. Berikut analisis platform exchange cryptocurrency berdasarkan beberapa variabel.")
 
-# Halaman Utama
-st.subheader("Perbandingan Keseluruhan Variabel")
-# Melting dataframe untuk menampilkan semua variabel dalam satu grafik
-nilai_melted = nilai_df.melt(id_vars="Platform", var_name="Variabel", value_name="Nilai")
-
-# Altair chart for combined variables
-combined_chart = (
-    alt.Chart(nilai_melted)
-    .mark_line(point=True)
-    .encode(
-        x=alt.X("Variabel:N", sort=list(bobot.keys())),
-        y=alt.Y("Nilai:Q"),
-        color=alt.Color("Platform:N", scale=alt.Scale(scheme="category10")),
-        tooltip=["Platform", "Variabel", "Nilai"]
-    )
-    .properties(
-        title="Perbandingan Nilai Antar Platform Berdasarkan Semua Variabel",
-        width=700,
-        height=400
-    )
-)
-st.altair_chart(combined_chart, use_container_width=True)
-
 # Sidebar Menu
 menu = st.sidebar.selectbox("Pilih Variabel", ["Platform Terbaik"] + list(bobot.keys()))
 
 if menu == "Platform Terbaik":
+    st.subheader("Perbandingan Keseluruhan Variabel")
+    # Melting dataframe untuk menampilkan semua variabel dalam satu grafik
+    nilai_melted = nilai_df.melt(id_vars="Platform", var_name="Variabel", value_name="Nilai")
+    
+    # Altair chart for combined variables
+    combined_chart = (
+        alt.Chart(nilai_melted)
+        .mark_line(point=True)
+        .encode(
+            x=alt.X("Variabel:N", sort=list(bobot.keys())),
+            y=alt.Y("Nilai:Q"),
+            color=alt.Color("Platform:N", scale=alt.Scale(scheme="category10")),
+            tooltip=["Platform", "Variabel", "Nilai"]
+        )
+        .properties(
+            title="Perbandingan Nilai Antar Platform Berdasarkan Semua Variabel",
+            width=700,
+            height=400
+        )
+    )
+    st.altair_chart(combined_chart, use_container_width=True)
+    
     st.subheader("Peringkat Platform Terbaik Berdasarkan SAW")
     st.dataframe(saw_df)  # Menampilkan tabel dengan nomor urut mulai dari 1
     # Grafik SAW
@@ -105,6 +104,7 @@ if menu == "Platform Terbaik":
         )
     )
     st.altair_chart(saw_chart, use_container_width=True)
+
 else:
     st.subheader(f"Perbandingan Berdasarkan Variabel: {menu}")
     comparison_df = nilai_df[["Platform", menu]]
