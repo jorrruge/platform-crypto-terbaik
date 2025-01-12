@@ -37,6 +37,14 @@ saw_data = {
 saw_df = pd.DataFrame(saw_data)
 saw_df.index += 1  # Adjust index to start from 1
 
+# Generate tabel "Alternatif Terbaik/Terendah"
+best_worst_df = pd.DataFrame({
+    "No": list(range(1, len(bobot) + 1)),
+    "Variabel": list(bobot.keys()),
+    "Alternatif Terbaik pada Variabel Ini": nilai_df.set_index("Platform").idxmax().tolist(),
+    "Alternatif Terendah pada Variabel Ini": nilai_df.set_index("Platform").idxmin().tolist(),
+})
+
 # Streamlit UI
 st.title("Platform Exchange Cryptocurrency Terbaik")
 st.write("Hai! Saya Jorge Michael Bryan, mahasiswa Universitas Brawijaya. Berikut analisis platform exchange cryptocurrency berdasarkan beberapa variabel.")
@@ -56,7 +64,13 @@ if menu == "Platform Terbaik":
         .encode(
             x=alt.X("Variabel:N", sort=list(bobot.keys())),
             y=alt.Y("Nilai:Q"),
-            color=alt.Color("Platform:N", scale=alt.Scale(scheme="category10")),
+            color=alt.Color(
+                "Platform:N",
+                scale=alt.Scale(
+                    domain=["Binance", "Indodax", "Tokocrypto"],
+                    range=["#FF7F0E", "#1F77B4", "#2CA02C"]  # Menukar warna Binance dengan Indodax
+                )
+            ),
             tooltip=["Platform", "Variabel", "Nilai"]
         )
         .properties(
@@ -68,7 +82,6 @@ if menu == "Platform Terbaik":
     st.altair_chart(combined_chart, use_container_width=True)
     
     st.subheader("Peringkat Platform Terbaik Berdasarkan SAW")
-    st.dataframe(saw_df)  # Menampilkan tabel dengan nomor urut mulai dari 1
     # Grafik SAW
     saw_chart = (
         alt.Chart(saw_df)
@@ -76,7 +89,13 @@ if menu == "Platform Terbaik":
         .encode(
             x=alt.X("Platform", sort=["Binance", "Indodax", "Tokocrypto"]),
             y=alt.Y("Nilai SAW"),
-            color=alt.Color("Platform", scale=alt.Scale(scheme="category10")),
+            color=alt.Color(
+                "Platform:N",
+                scale=alt.Scale(
+                    domain=["Binance", "Indodax", "Tokocrypto"],
+                    range=["#FF7F0E", "#1F77B4", "#2CA02C"]  # Menukar warna Binance dengan Indodax
+                )
+            ),
             tooltip=["Platform", "Nilai SAW", "Peringkat"]
         )
         .properties(
@@ -86,16 +105,21 @@ if menu == "Platform Terbaik":
         )
     )
     st.altair_chart(saw_chart, use_container_width=True)
+    
+    # Menampilkan tabel SAW
+    st.dataframe(saw_df)  # Tabel SAW di bawah grafik
+    
+    st.subheader("Alternatif Terbaik dan Terendah pada Setiap Variabel")
+    # Menampilkan tabel alternatif terbaik dan terendah
+    st.table(best_worst_df)
 
 else:
     st.subheader(f"Perbandingan Berdasarkan Variabel: {menu}")
     
-    # Membuat kolom "Nilai" berdasarkan nilai rata-rata dan bobot
+    # Membuat kolom "Nilai" berdasarkan nilai rata-rata
     comparison_df = nilai_df[["Platform", menu]].copy()
     comparison_df.rename(columns={menu: "Nilai"}, inplace=True)
-    
-    # Menampilkan tabel
-    st.table(comparison_df)
+    comparison_df.index += 1  # Adjust index to start from 1
     
     # Grafik variabel tertentu
     variable_chart = (
@@ -104,7 +128,13 @@ else:
         .encode(
             x=alt.X("Platform", sort=["Binance", "Indodax", "Tokocrypto"]),
             y=alt.Y("Nilai", title=f"Nilai {menu}"),
-            color=alt.Color("Platform", scale=alt.Scale(scheme="category10")),
+            color=alt.Color(
+                "Platform:N",
+                scale=alt.Scale(
+                    domain=["Binance", "Indodax", "Tokocrypto"],
+                    range=["#FF7F0E", "#1F77B4", "#2CA02C"]  # Menukar warna Binance dengan Indodax
+                )
+            ),
             tooltip=["Platform", "Nilai"]
         )
         .properties(
@@ -114,3 +144,6 @@ else:
         )
     )
     st.altair_chart(variable_chart, use_container_width=True)
+    
+    # Menampilkan tabel di bawah grafik
+    st.table(comparison_df)
