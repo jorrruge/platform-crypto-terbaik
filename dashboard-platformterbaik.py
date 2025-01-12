@@ -33,27 +33,9 @@ saw_data = {
     "Peringkat": [3, 1, 2],
 }
 
-# Data TOPSIS
-topsis_data = {
-    "Variabel": [
-        "Kemudahan Penggunaan", "Keamanan", "Likuiditas", "Biaya Transaksi", 
-        "Reputasi Platform", "Dukungan Pelanggan"
-    ],
-    "Solusi Ideal Positif": [
-        0.074833926, 0.169034549, 0.040267113, 0.263925478, 0.109379365, 0.020509599
-    ],
-    "Platform Terbaik": ["Indodax"] * 6,
-    "Solusi Ideal Negatif": [
-        0.05479558, 0.129463328, 0.031415128, 0.198977918, 0.081110543, 0.015424731
-    ],
-    "Platform Terburuk": ["Binance", "Tokocrypto", "Tokocrypto", "Binance", "Tokocrypto", "Binance"],
-}
-
 # Convert data to DataFrame
 saw_df = pd.DataFrame(saw_data)
 saw_df.index += 1  # Adjust index to start from 1
-
-topsis_df = pd.DataFrame(topsis_data)
 
 # Streamlit UI
 st.title("Platform Exchange Cryptocurrency Terbaik")
@@ -107,7 +89,13 @@ if menu == "Platform Terbaik":
 
 else:
     st.subheader(f"Perbandingan Berdasarkan Variabel: {menu}")
-    comparison_df = nilai_df[["Platform", menu]]
+    
+    # Membuat kolom "Nilai" berdasarkan nilai rata-rata dan bobot
+    comparison_df = nilai_df[["Platform", menu]].copy()
+    comparison_df.rename(columns={menu: "Nilai"}, inplace=True)
+    
+    # Menampilkan tabel
+    st.table(comparison_df)
     
     # Grafik variabel tertentu
     variable_chart = (
@@ -115,9 +103,9 @@ else:
         .mark_bar()
         .encode(
             x=alt.X("Platform", sort=["Binance", "Indodax", "Tokocrypto"]),
-            y=alt.Y(menu, title=f"Nilai {menu}"),
+            y=alt.Y("Nilai", title=f"Nilai {menu}"),
             color=alt.Color("Platform", scale=alt.Scale(scheme="category10")),
-            tooltip=["Platform", menu]
+            tooltip=["Platform", "Nilai"]
         )
         .properties(
             title=f"Grafik {menu} Antar Platform",
