@@ -45,6 +45,9 @@ best_worst_df = pd.DataFrame({
     "Alternatif Terendah pada Variabel Ini": nilai_df.set_index("Platform").idxmin().tolist(),
 })
 
+# Menghapus kolom index default dari Pandas (hilangkan kolom tidak terpakai seperti "0, 1, 2...")
+best_worst_df.reset_index(drop=True, inplace=True)
+
 # Streamlit UI
 st.title("Platform Exchange Cryptocurrency Terbaik")
 st.write("Hai! Saya Jorge Michael Bryan, mahasiswa Universitas Brawijaya. Berikut analisis platform exchange cryptocurrency berdasarkan beberapa variabel.")
@@ -81,7 +84,7 @@ if menu == "Platform Terbaik":
     )
     st.altair_chart(combined_chart, use_container_width=True)
     
-    st.subheader("Peringkat Platform Terbaik Berdasarkan SAW")
+    st.subheader("Peringkat Platform Terbaik")
     # Grafik SAW
     saw_chart = (
         alt.Chart(saw_df)
@@ -99,7 +102,7 @@ if menu == "Platform Terbaik":
             tooltip=["Platform", "Nilai SAW", "Peringkat"]
         )
         .properties(
-            title="Grafik Peringkat Berdasarkan SAW",
+            title="Grafik Peringkat",
             width=600,
             height=400
         )
